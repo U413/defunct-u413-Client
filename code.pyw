@@ -1,36 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import wx
-import urllib2
-
-o=urllib2.build_opener(urllib2.HTTPCookieProcessor())
-url="http://api.u413.com/"
-null=None
-true=True
-false=False
-
-metadata=eval(o.open(urllib2.Request(url+"metadata")).read())["DisplayItems"][0]
-
-def send_command(command):
-	req=urllib2.Request(url,
-		headers={
-			"Content-Type":"application/json",
-			"Accept":"*/*",
-			"User-Agent":"PiMaster.u413_UI"},
-		data={
-			'{"cli":%s}'%command})
-	return o.open(req).read()
-
-def get_u413():
-	return eval(o.open(urllib2.Request(url)).read())
+import u413
 
 class window(wx.Frame):
 	def __init__(self):
-		data=get_u413()
+		self.u413=u413.u413()
 		wx.Frame.__init__(self,None,-1,title=data["TerminalTitle"])
 		self.SetSizeHintsSz(wx.DefaultSize,wx.DefaultSize)
-		main_sizer=wx.BoxSizer(wx.VERTICAL)
 		self.SetBackgroundColour(wx.Colour(0,0,0))
+		main_sizer=wx.BoxSizer(wx.VERTICAL)
 		self.main_panel=wx.Panel(self,wx.ID_ANY,wx.DefaultPosition,wx.DefaultSize,wx.TAB_TRAVERSAL)
 		self.main_panel.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND))
 		user_area=wx.BoxSizer(wx.VERTICAL)
@@ -46,7 +25,7 @@ class window(wx.Frame):
 		self.pointer.SetForegroundColour(wx.Colour(0,255,0))
 		self.pointer.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND))
 		cmdline_sizer.Add(self.pointer,0,wx.ALL,5)
-		self.cmdline=wx.TextCtrl(self.main_panel,wx.ID_ANY,wx.EmptyString,wx.DefaultPosition,wx.Size(-1,15),wx.TE_MULTILINE|wx.TE_NO_VSCROLL|wx.TE_WORDWRAP|wx.NO_BORDER)
+		self.cmdline=wx.TextCtrl(self.main_panel,wx.ID_ANY,wx.EmptyString,wx.DefaultPosition,wx.Size(-1,15),wx.TE_MULTILINE|wx.TE_NO_VSCROLL|wx.TE_WORDWRAP|wx.NO_BORDER|wx.TE_PROCESS_ENTER)
 		self.cmdline.SetFont(wx.Font(11,76,90,90,False,"Courier New"))
 		self.cmdline.SetForegroundColour(wx.Colour(0,255,0))
 		self.cmdline.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND))
@@ -62,6 +41,9 @@ class window(wx.Frame):
 	
 	def __del__(self):
 		pass
+	
+	def OnEnter(self,event):
+		self.SetTitle(self.u413.get_title())
 		
 if __name__=="__main__":
 	app=wx.App(False)
