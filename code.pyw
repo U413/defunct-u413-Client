@@ -47,14 +47,17 @@ class window(wx.Frame):
 		if event.GetKeyCode()==wx.WXK_RETURN:
 			self.u413.send_command(self.cmdline.GetValue())
 			self.cmdline.SetValue("")
-			if self.u413.data["ClearScreen"]:
-				self.display.SetValue("")
 			text=""
+			if self.u413.data["ClearScreen"]:
+				self.display.SetLabel("")
+			else:
+				#without this the sections aren't separated properly
+				text='\n'
 			for p in self.u413.data["DisplayItems"]:
-				text+=p["Text"]+'\n'
-			self.display.AppendText(text)
+				text+=p["Text"]+'\r\n'
+			self.display.SetLabel(self.display.GetLabel()+text)
 			self.SetTitle(self.u413.title)
-			self.context.SetValue(self.u413.data["ContextText"])
+			self.context.SetLabel(self.u413.data["ContextText"]+'> ')
 		
 if __name__=="__main__":
 	app=wx.App(False)
